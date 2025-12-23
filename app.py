@@ -140,7 +140,8 @@ def get_articles_from_feishu():
             else:
                 return ''
         
-        title = get_field_value(fields.get('标题', ''))
+        # 尝试从多个可能的字段中获取标题
+        title = get_field_value(fields.get('文本', '')) or get_field_value(fields.get('标题', ''))
         quote = get_field_value(fields.get('金句输出', ''))
         comment = get_field_value(fields.get('黄叔点评', ''))
         content = get_field_value(fields.get('概要内容输出', ''))
