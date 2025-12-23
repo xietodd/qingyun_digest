@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 青云精选{% endblock %}
+{% block description %}探索精彩内容，发现思想火花{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="hero-section">
+        <h1 class="hero-title">探索思想的力量</h1>
+        <p class="hero-subtitle">精选内容，深度点评，启发思考</p>
+    </div>
+
+    <div class="articles-grid">
+        {% if articles %}
+        {% for article in articles %}
+        <article class="article-card" data-article-id="{{ article.id }}">
+            <div class="article-card-inner">
+                <h2 class="article-title">{{ article.title }}</h2>
+
+                {% if article.quote %}
+                <blockquote class="article-quote">
+                    <span class="quote-mark">"</span>
+                    <p class="quote-text">{{ article.quote }}</p>
+                    <span class="quote-mark">"</span>
+                </blockquote>
+                {% endif %}
+
+                {% if article.comment %}
+                <div class="article-comment">
+                    <div class="comment-label">青云点评</div>
+                    <p class="comment-text">{{ article.comment }}</p>
+                </div>
+                {% endif %}
+
+                <div class="article-preview">
+                    <p>{{ article.preview }}</p>
+                </div>
+
+                <a href="/article/{{ article.id }}" target="_blank" class="read-more-btn">
+                    <span>阅读全文</span>
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 3L11 8L6 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </a>
+            </div>
+        </article>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3 class="empty-title">暂无内容</h3>
+            <p class="empty-text">请在飞书多维表格中添加文章数据</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
