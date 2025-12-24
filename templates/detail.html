@@ -46,7 +46,7 @@
                 <h3 class="content-title">完整内容</h3>
             </div>
             <div class="content-body">
-                {{ article.content | safe | replace('\n', '<br>') }}
+                {{ article.content | markdown | safe }}
             </div>
         </div>
 

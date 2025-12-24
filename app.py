@@ -1,10 +1,26 @@
 from flask import Flask, render_template, jsonify
 import requests
 import time
+import markdown
 from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# 添加 Markdown 渲染过滤器
+@app.template_filter('markdown')
+def markdown_filter(text):
+    """将 Markdown 文本转换为 HTML"""
+    if not text:
+        return ''
+    # 配置 Markdown 扩展
+    md = markdown.Markdown(extensions=[
+        'extra',  # 支持表格、代码块等
+        'nl2br',  # 自动将换行转换为 <br>
+        'sane_lists'  # 更好的列表处理
+    ])
+    return md.convert(text)
+
 
 # 简单的内存缓存
 cache = {
