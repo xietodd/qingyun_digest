@@ -22,6 +22,29 @@ def markdown_filter(text):
     return md.convert(text)
 
 
+def markdown_to_plain_text(text):
+    """将 Markdown 文本转换为纯文本，用于预览"""
+    if not text:
+        return ''
+    import re
+    # 移除 Markdown 语法
+    text = re.sub(r'\*\*\*(.+?)\*\*\*', r'\1', text)  # 粗斜体
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # 粗体
+    text = re.sub(r'\*(.+?)\*', r'\1', text)  # 斜体
+    text = re.sub(r'__(.+?)__', r'\1', text)  # 粗体
+    text = re.sub(r'_(.+?)_', r'\1', text)  # 斜体
+    text = re.sub(r'#{1,6}\s+', '', text)  # 标题
+    text = re.sub(r'\[(.+?)\]\(.+?\)', r'\1', text)  # 链接
+    text = re.sub(r'`(.+?)`', r'\1', text)  # 行内代码
+    text = re.sub(r'<br\s*/?>','', text, flags=re.IGNORECASE)  # HTML 换行
+    text = re.sub(r'---+', '', text)  # 分隔线
+    text = re.sub(r'>\s+', '', text)  # 引用
+    text = re.sub(r'[-*+]\s+', '', text)  # 列表
+    text = re.sub(r'\d+\.\s+', '', text)  # 有序列表
+    text = re.sub(r'\s+', ' ', text)  # 多余空格
+    return text.strip()
+
+
 # 简单的内存缓存
 cache = {
     'data': None,
@@ -163,13 +186,17 @@ def get_articles_from_feishu():
         content = get_field_value(fields.get('概要内容输出', ''))
         
         if title:  # 只添加有标题的记录
+            # 生成纯文本预览（移除 Markdown 语法）
+            plain_content = markdown_to_plain_text(content)
+            preview_text = plain_content[:100] + '...' if len(plain_content) > 100 else plain_content
+            
             articles.append({
                 'id': record.get('record_id'),
                 'title': title,
                 'quote': quote,
                 'comment': comment,
                 'content': content,
-                'preview': content[:100] + '...' if len(content) > 100 else content
+                'preview': preview_text
             })
     
     # 更新缓存
