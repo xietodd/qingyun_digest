@@ -16,6 +16,12 @@
             </a>
 
             <h1 class="detail-title">{{ article.title }}</h1>
+
+            {% if article.thumbnail %}
+            <div class="detail-thumbnail">
+                <img src="{{ article.thumbnail }}" alt="{{ article.title }}" loading="lazy">
+            </div>
+            {% endif %}
         </div>
 
         {% if article.quote %}

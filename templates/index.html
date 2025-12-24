@@ -15,6 +15,12 @@
         {% for article in articles %}
         <article class="article-card" data-article-id="{{ article.id }}">
             <div class="article-card-inner">
+                {% if article.thumbnail %}
+                <div class="article-thumbnail">
+                    <img src="{{ article.thumbnail }}" alt="{{ article.title }}" loading="lazy">
+                </div>
+                {% endif %}
+
                 <h2 class="article-title">{{ article.title }}</h2>
 
                 {% if article.quote %}

@@ -36,12 +36,32 @@ def markdown_to_plain_text(text):
     text = re.sub(r'#{1,6}\s+', '', text)  # 标题
     text = re.sub(r'\[(.+?)\]\(.+?\)', r'\1', text)  # 链接
     text = re.sub(r'`(.+?)`', r'\1', text)  # 行内代码
-    text = re.sub(r'<br\s*/?>','', text, flags=re.IGNORECASE)  # HTML 换行
+    text = re.sub(r'<br\s*/?>', '', text, flags=re.IGNORECASE)  # HTML 换行
     text = re.sub(r'---+', '', text)  # 分隔线
     text = re.sub(r'>\s+', '', text)  # 引用
     text = re.sub(r'[-*+]\s+', '', text)  # 列表
     text = re.sub(r'\d+\.\s+', '', text)  # 有序列表
     text = re.sub(r'\s+', ' ', text)  # 多余空格
+    return text.strip()
+
+
+def clean_quote_text(text):
+    """清理精选金句中的 Markdown 语法，保留纯文本"""
+    if not text:
+        return ''
+    import re
+    # 处理嵌套的星号（如 ** ** 或 ** **text** **）
+    text = re.sub(r'\*\*\s+\*\*', '', text)  # 移除空的双星号
+    text = re.sub(r'\*\*\s+', '', text)  # 移除开头的双星号加空格
+    text = re.sub(r'\s+\*\*', '', text)  # 移除结尾的空格加双星号
+    # 移除 Markdown 语法
+    text = re.sub(r'\*\*\*(.+?)\*\*\*', r'\1', text)  # 粗斜体
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # 粗体
+    text = re.sub(r'\*(.+?)\*', r'\1', text)  # 斜体
+    text = re.sub(r'__(.+?)__', r'\1', text)  # 粗体
+    text = re.sub(r'_(.+?)_', r'\1', text)  # 斜体
+    # 清理多余空格
+    text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
 
@@ -185,18 +205,30 @@ def get_articles_from_feishu():
         comment = get_field_value(fields.get('黄叔点评', ''))
         content = get_field_value(fields.get('概要内容输出', ''))
         
+        # 获取缩略图
+        thumbnail_url = ''
+        thumbnail_field = fields.get('缩略图', [])
+        if isinstance(thumbnail_field, list) and len(thumbnail_field) > 0:
+            # 飞书附件字段格式
+            if isinstance(thumbnail_field[0], dict):
+                thumbnail_url = thumbnail_field[0].get('url', '') or thumbnail_field[0].get('tmp_url', '')
+        
         if title:  # 只添加有标题的记录
             # 生成纯文本预览（移除 Markdown 语法）
             plain_content = markdown_to_plain_text(content)
             preview_text = plain_content[:100] + '...' if len(plain_content) > 100 else plain_content
             
+            # 清理精选金句中的 Markdown 语法
+            clean_quote = clean_quote_text(quote) if quote else ''
+            
             articles.append({
                 'id': record.get('record_id'),
                 'title': title,
-                'quote': quote,
+                'quote': clean_quote,
                 'comment': comment,
                 'content': content,
-                'preview': preview_text
+                'preview': preview_text,
+                'thumbnail': thumbnail_url
             })
     
     # 更新缓存
