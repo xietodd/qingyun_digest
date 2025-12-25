@@ -207,11 +207,16 @@ def get_articles_from_feishu():
         
         # 获取缩略图
         thumbnail_url = ''
-        thumbnail_field = fields.get('缩略图', [])
-        if isinstance(thumbnail_field, list) and len(thumbnail_field) > 0:
-            # 飞书附件字段格式
+        thumbnail_field = fields.get('缩略图', {})
+        
+        # 处理不同的缩略图字段格式
+        if isinstance(thumbnail_field, dict):
+            # 字典格式：{"link": "URL", "text": "查看缩略图"}
+            thumbnail_url = thumbnail_field.get('link', '') or thumbnail_field.get('url', '')
+        elif isinstance(thumbnail_field, list) and len(thumbnail_field) > 0:
+            # 列表格式：[{"url": "URL", ...}]
             if isinstance(thumbnail_field[0], dict):
-                thumbnail_url = thumbnail_field[0].get('url', '') or thumbnail_field[0].get('tmp_url', '')
+                thumbnail_url = thumbnail_field[0].get('url', '') or thumbnail_field[0].get('tmp_url', '') or thumbnail_field[0].get('link', '')
         
         if title:  # 只添加有标题的记录
             # 生成纯文本预览（移除 Markdown 语法）
